@@ -28,7 +28,7 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/libicapapi/Default
   URL:=http://c-icap.sourceforge.net/
-  DEPENDS:=+libc +libpcre +libpthread +librt +zlib +libbz2
+  DEPENDS:=+libc +libpcre +libpthread +librt +zlib +libbz2 +libdb47
   MAINTAINER:=Jorge Vargas <jorge.vargas@saint-tech.com>
 endef
 
@@ -57,6 +57,9 @@ define Package/$(PKG_NAME)/description
 	used with HTTP proxies that support the ICAP protocol to
 	implement content adaptation and filtering services.
 endef
+
+CONFIGURE_ARGS += \
+	--with-ldap=no
 
 CONFIGURE_VARS += \
 	ac_cv_10031b_ipc_sem=yes \
