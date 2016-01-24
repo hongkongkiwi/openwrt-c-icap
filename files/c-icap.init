@@ -6,55 +6,16 @@ STOP=10
 
 USE_PROCD=1
 PROG=/usr/bin/c-icap
-CONFIGFILE="/tmp/c-icap/c-icap.conf"
-
-validate_squid_section() {
-	uci_validate_section c-icap c-icap "${1}" \
-		'config_file:string' \
-		'http_port:port:3128' \
-		'http_port_options:string' \
-		'ssldb:string' \
-		'ssldb_options:string' \
-		'coredump_dir:string' \
-		'visible_hostname:string:OpenWrt' \
-		'pinger_enable:string:off'
-}
+CONFIG_FILE=/etc/c-icap/c-icap.conf
+PID_FILE=/var/run/c-icap/c-icap.pid
 
 start_service() {
-	local config_file http_port http_port_options ssldb ssldb_options coredump_dir visible_hostname pinger_enable
-
-	validate_squid_section c-icap || {
-		echo "validation failed"
-		return 1
-	}
-
-	config_dir=$(dirname $CONFIGFILE)
-	[ -d $config_dir ] || mkdir -p $config_dir && chown nobody:nogroup $config_dir
-	#[ -d $coredump_dir ] || mkdir -p $coredump_dir && chown nobody:nogroup $coredump_dir
-
-	cat $config_file > $CONFIGFILE
-	echo http_port $http_port $http_port_options >> $CONFIGFILE
-	echo coredump_dir $coredump_dir >> $CONFIGFILE
-	echo visible_hostname $visible_hostname >> $CONFIGFILE
-	echo pinger_enable $pinger_enable >> $CONFIGFILE
-	[ "$ssldb" ] && echo sslcrtd_program /usr/lib/squid/ssl_crtd -s $ssldb $ssldb_options >> $CONFIGFILE
-	$PROG -s -f $CONFIGFILE -N -z 2>/dev/null
-
-	procd_open_instance
-	procd_set_param command $PROG -s -f $CONFIGFILE -N
-	procd_set_param file $CONFIGFILE
-	procd_set_param respawn
-	procd_close_instance
+        "${PROG}" -f "$CONFIG_FILE"
 }
 
-stop_service()
-{
-	kill $(cat /var/run/c-icap/c-icap.pid)
-}
-
-service_triggers()
-{
-	procd_add_reload_trigger "c-icap"
-	procd_add_validation validate_squid_section
+stop_service() {
+	[ ! -f "$PID_FILE" ] && { echo "c-icap is not running"; exit 1; }
+	PID=$(cat "$PID_FILE")
+        kill ${PID}
 }
 
