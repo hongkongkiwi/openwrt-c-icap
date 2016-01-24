@@ -102,9 +102,10 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/tmp/run/c-icap
 
-        $(INSTALL_DIR) $(1)/etc/c-icap
-        $(INSTALL_BIN) $(PKG_INSTALL_DIR)/etc/c-icap.magic $(1)/etc/c-icap
-	$(INSTALL_CONF) ./files/c-icap.conf $(1)/etc/c-icap/
+	$(INSTALL_DIR) $(1)/etc/c-icap
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/etc/c-icap.magic $(1)/etc/c-icap
+	$(INSTALL_CONF) ./files/c-icap.conf $(1)/etc/c-icap
 	$(INSTALL_CONF) ./files/c-icap.init $(1)/etc/init.d/c-icap
 
 	$(INSTALL_DIR) $(1)/usr/bin
