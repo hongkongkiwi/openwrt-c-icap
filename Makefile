@@ -28,7 +28,7 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/libicapapi/Default
   URL:=http://c-icap.sourceforge.net/
-  DEPENDS:=+libc +libpcre +libpthread +librt +zlib +libbz2 +libdb47
+  DEPENDS:=+libc +libpcre +libpthread +librt +zlib +libbz2 +libdb47 +memcached
   MAINTAINER:=Jorge Vargas <jorge.vargas@saint-tech.com>
 endef
 
@@ -59,7 +59,14 @@ define Package/$(PKG_NAME)/description
 endef
 
 CONFIGURE_ARGS += \
-	--with-ldap=no
+	--prefix=/usr \
+	--sysconfdir=/etc \
+	--with-perl=no \
+	--with-zlib=$(STAGING_DIR)/usr \
+	--with-bzlib=$(STAGING_DIR)/usr \
+	--with-bdb=$(STAGING_DIR)/usr \
+	--with-ldap=no \
+	--with-memcached=$(STAGING_DIR)/usr
 
 CONFIGURE_VARS += \
 	ac_cv_10031b_ipc_sem=yes \
@@ -93,10 +100,15 @@ define Package/libicapapi/install
 endef
 
 define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/tmp/run/c-icap
+
+        $(INSTALL_DIR) $(1)/etc/c-icap
+        $(INSTALL_BIN) $(PKG_INSTALL_DIR)/etc/c-icap.magic $(1)/etc/c-icap
+	$(INSTALL_CONF) ./files/c-icap.conf $(1)/etc/c-icap/
+	$(INSTALL_CONF) ./files/c-icap.init $(1)/etc/init.d/c-icap
+
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin/
-	#$(INSTALL_DIR) $(1)/etc/config
-	#$(INSTALL_DATA) $(PKG_BUILD_DIR)/c-icap.conf $(1)/etc/config
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin/		
 endef
 
 $(eval $(call BuildPackage,libicapapi))
